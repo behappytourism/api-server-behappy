@@ -1,0 +1,184 @@
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-print-color-adjust: exact;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+    font-size: 14px;
+    line-height: 28px;
+}
+
+.container {
+    margin: 30px;
+}
+
+.py-4 {
+    padding: 16px 0px 16px 0px;
+}
+
+.bottom-hr {
+    border-bottom: 1px solid #444;
+}
+
+.pt-0 {
+    padding-top: 0px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.header span {
+    font-size: 18px;
+    background-color: #002366;
+    color: white;
+    padding: 4px;
+    border-radius: "100%";
+}
+
+.header h1 {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.date-txt {
+    display: block;
+    font-size: 12px;
+    color: gray;
+    text-align: center;
+}
+
+.guest-wrapper {
+    display: flex;
+    gap: 10px;
+    background-color: #002366;
+    padding: 3px 8px;
+    color: white;
+}
+
+/* .guest-wrapper p:nth-child(1) {
+    color: gray;
+} */
+
+.guest-wrapper p {
+    font-weight: 500;
+}
+
+.details-wrapper h3 {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.details-wrapper table {
+    width: 100%;
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 28px;
+}
+
+.details-wrapper table tbody tr td:nth-child(1) {
+    color: gray;
+}
+
+.details-wrapper table tbody tr td ul {
+    list-style: none;
+}
+
+.details-wrapper .checkInLabel {
+    color: gray;
+}
+
+.details-wrapper .checkIn {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.details-table {
+    margin-top: 2;
+}
+
+.details-table table {
+    width: 100%;
+    font-size: 14px;
+}
+
+.details-table table tbody tr td:nth-child(1) {
+    color: gray;
+    padding: 4px;
+}
+
+.p-7 {
+    padding: 4px;
+}
+
+.inclusions-wrapper {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0px;
+}
+
+.inclusions-wrapper span {
+    color: gray;
+}
+
+.traveller-details-wrapper {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.traveller-details-wrapper h3 {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.traveller-details-wrapper ul {
+    margin-top: 10px;
+    list-style: none;
+}
+
+.traveller-details-wrapper ul li span {
+    color: gray;
+    font-weight: 500;
+}
+
+.add-info-wrapper h3 {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+.add-info-wrapper ul {
+    margin-left: 17px;
+}
+
+.congtz-text {
+    font-weight: 600;
+}
+
+.my-4 {
+    margin: 16px 0px;
+}
+
+.details-table-container {
+    display: flex;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}

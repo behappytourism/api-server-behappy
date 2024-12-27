@@ -1,0 +1,11 @@
+node_modules
+combined.log
+error.log
+
+.env.development
+.env.production
+.env.example
+whatsappDb
+.wwebjs_auth
+public
+public-copy
