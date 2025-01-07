@@ -750,9 +750,9 @@ module.exports = {
             const { skip = 0, limit = 10 } = req.query;
 
             const standAlones = await AttractionStandAlone.find({ isDeleted: false }).select(
-                "title slug images"
+                "title slug images description"
             );
-            const totalStandAlones = await AttractionStandAlone.find(query).count();
+            const totalStandAlones = await AttractionStandAlone.find({ isDeleted: false }).count();
 
             res.status(200).json({
                 standAlones,
@@ -760,6 +760,8 @@ module.exports = {
                 limit: Number(limit),
                 totalStandAlones,
             });
-        } catch (err) {}
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
     },
 };
