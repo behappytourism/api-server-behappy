@@ -745,4 +745,21 @@ module.exports = {
             sendErrorResponse(res, 500, err);
         }
     },
+    getAllStandAlone: async (req, res) => {
+        try {
+            const { skip = 0, limit = 10 } = req.query;
+
+            const standAlones = await AttractionStandAlone.find({ isDeleted: false }).select(
+                "title slug images"
+            );
+            const totalStandAlones = await AttractionStandAlone.find(query).count();
+
+            res.status(200).json({
+                standAlones,
+                skip: Number(skip),
+                limit: Number(limit),
+                totalStandAlones,
+            });
+        } catch (err) {}
+    },
 };
