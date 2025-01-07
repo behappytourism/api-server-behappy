@@ -117,6 +117,11 @@ const b2bOrderSchema = new Schema(
             required: true,
             default: false,
         },
+        isCancellationViewed: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
     },
     { timestamps: true }
 );

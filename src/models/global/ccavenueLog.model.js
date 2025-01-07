@@ -1,20 +1,21 @@
 const { Schema, model } = require("mongoose");
 
-const ccacenueLogSchema = new Schema(
+const ccavenueLogSchema = new Schema(
     {
-        paymentId: {
-            type: String,
-            required: true,
-        },
-        orderId: {
-            type: String,
-            required: true,
-        },
-        data: {},
+        processName: { type: String },
+        stepNumber: { type: Number },
+        stepName: { type: String },
+        comment: { type: String },
+        redirectionUrl: { type: String },
+        request: {},
+        response: {},
+        amount: { type: Number },
+        orderType: { type: String },
+        orderId: { type: String },
     },
     { timestamps: true }
 );
 
-const CcavenueLog = model("CcavenueLog", ccacenueLogSchema);
+const CcavenueLog = model("CcavenueLog", ccavenueLogSchema);
 
 module.exports = CcavenueLog;

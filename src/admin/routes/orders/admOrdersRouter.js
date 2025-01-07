@@ -24,6 +24,7 @@ const {
     getAllCancelledOrders,
     cancelB2bOrder,
     approveOrderB2bCancellationRequest,
+    orderCancelStatusChange,
 } = require("../../controllers/orders/admOrdersController");
 
 router.get("/b2b/all", getAllOrders);
@@ -36,6 +37,7 @@ router.get("/b2c/invoice/:orderId", downloadB2cOrderInvoice);
 
 router.get("/count", newOrderCount);
 router.patch("/count/:id", orderViewStatusChange);
+router.patch("/cancellation/count/:id", orderCancelStatusChange);
 
 router.get("/b2b/cancel/all", getAllCancelledOrders);
 

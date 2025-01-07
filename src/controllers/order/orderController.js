@@ -231,10 +231,7 @@ module.exports = {
                     paymentStateMessage: "",
                 });
 
-                await CcavenueLog.create({
-                    paymentId: b2cOrderPayment?._id,
-                    orderId: b2cOrder?._id,
-                });
+             
 
                 return ccavenueFormHandler({
                     res,
@@ -262,9 +259,9 @@ module.exports = {
             const decryptedJsonResponse = ccav.redirectResponseToJson(encResp);
             const { order_id, order_status } = decryptedJsonResponse;
 
-            const ccavenueLog = await CcavenueLog.findOne({ paymentId: order_id });
-            ccavenueLog.data = decryptedJsonResponse;
-            await ccavenueLog.save();
+            // const { order_id, order_status } = req.body;
+
+
 
             let totalProfit = 0;
             let totalCost = 0;
@@ -286,8 +283,9 @@ module.exports = {
             totalProfit += Number(b2cOrder?.netProfit || 0);
             totalCost += Number(b2cOrder?.netCost) || 0;
 
-            if (b2cOrder?.orderStatus === "completed")
+            if (b2cOrder?.orderStatus === "completed") {
                 return sendErrorResponse(res, 400, "sorry, you have already completed this order!");
+            }
 
             let transferOrderPayment;
             let attractionPayment;
@@ -342,7 +340,7 @@ module.exports = {
                         amount: attractionOrder.totalAmount,
                         orderId: attractionOrder?._id,
                         paymentState: "pending",
-                        user: b2cOrder?.user,
+                        userId: b2cOrder?.user,
                         paymentMethod: "ccavenue",
                         paymentStateMessage: "",
                     });
@@ -407,12 +405,23 @@ module.exports = {
 
                 await B2CTransaction.create({
                     user: b2cOrder?.user,
-                    transactionType: "deduct",
-                    status: "success",
                     paymentProcessor: "ccavenue",
-                    orderId: b2cOrder?._id,
-                    amount: b2cOrder?.netPrice,
+                    product: "all",
+                    processId: b2cOrder?._id,
+                    description: `order payment`,
+                    directAmount: b2cOrder.netPrice,
+                    remark: "order payment",
+                    dateTime: new Date(),
                 });
+
+                // await B2CTransaction.create({
+                //     user: b2cOrder?.user,
+                //     transactionType: "deduct",
+                //     status: "success",
+                //     paymentProcessor: "ccavenue",
+                //     orderId: b2cOrder?._id,
+                //     amount: b2cOrder?.netPrice,
+                // });
 
                 b2cOrder.paymentState = "fully-paid";
                 b2cOrder.orderStatus = "completed";

@@ -26,6 +26,21 @@ const ccavenueFormHandler = async ({ res, orderId, totalAmount, redirectUrl, can
             accessCode +
             '"><script language="javascript">document.redirect.submit();</script></form>';
 
+        createCcAvenueLog({
+            stepNumber: 1001,
+            redirectionUrl: redirectUrl,
+            request: {
+                orderParams,
+                accessCode,
+                encRequest,
+                formbody,
+            },
+            response: "",
+            amount: totalAmount,
+            orderType: "attraction",
+            orderId: orderId,
+        });
+
         res.setHeader("Content-Type", "text/html");
         res.write(formbody);
         res.end();

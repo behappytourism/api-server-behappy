@@ -116,7 +116,7 @@ const WhatsappConfig = require("./global/whatsappConfig.model");
 const WhatsappManagement = require("./global/whtsappManagement.model");
 const Notification = require("./notification/notification.model");
 const CcavenueLog = require("./global/ccavenueLog.model");
-const EmailConfig = require("./settings/emailConfig.model");
+// const EmailConfig = require("./settings/emailConfig.model");
 const B2cPromoCode = require("./global/b2cPromoCode.model");
 const EmailReceiverConfig = require("./settings/emailReceiverConfig.model");
 const B2CAttractionOrderPayment = require("./attraction/b2cAttractionOrderPayment.model");
@@ -131,6 +131,16 @@ const AccountHead = require("./accounts/accountHead.model");
 const AccountGroup = require("./accounts/accountGroup.model");
 const AccountNature = require("./accounts/accountNature.model");
 const AccountGlCode = require("./accounts/accountGlCode.model");
+
+const EmailTemplate = require("./email/emailTemplate.model");
+const EmailList = require("./email/emailListing.model");
+const EmailCampaign = require("./email/emailCampaign.model");
+const EmailImage = require("./email/emailImage.model");
+const EmailCampaignGroup = require("./email/emailCampaignGroup.model");
+const EmailUnsubscriber = require("./email/emailUnsubscriber.model");
+// const AdminB2bAccessGroup = require("./global/adminB2bAccessGroup.model");
+const EmailFooter = require("./email/emailFooter.model");
+const EmailConfig = require("./email/emailConfig.model");
 
 module.exports = {
     B2BHomeSection,
@@ -243,4 +253,14 @@ module.exports = {
     AccountNature,
     AccountHead,
     AccountGlCode,
+
+    //email
+    EmailTemplate,
+    EmailList,
+    EmailCampaign,
+    EmailImage,
+    EmailCampaignGroup,
+    EmailUnsubscriber,
+    // EmailConfig,
+    EmailFooter,
 };

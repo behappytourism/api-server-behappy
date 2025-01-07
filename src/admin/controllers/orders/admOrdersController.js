@@ -54,7 +54,7 @@ module.exports = {
                 resellerId,
             } = req.query;
 
-            const filters1 = {};
+            const filters1 = { orderStatus: { $ne: "pending" } };
             const filters2 = {};
 
             if (referenceNo) {
@@ -263,7 +263,7 @@ module.exports = {
                 limit = 10,
             } = req.query;
 
-            const filters1 = {};
+            const filters1 = { orderStatus: { $ne: "pending" } };
             const filters2 = {};
 
             if (referenceNo) {
@@ -567,7 +567,7 @@ module.exports = {
                                             },
                                             as: "order",
                                             in: {
-                                                $eq: ["$$order.cancellationStatus", "pending"],
+                                                $eq: ["$$order.cancellationStatus", "success"],
                                             },
                                         },
                                     },
@@ -581,6 +581,7 @@ module.exports = {
                 {
                     $match: {
                         isNew: true, // Filtering documents where isNew is true
+                        isCancellationViewed: false,
                     },
                 },
                 {
@@ -600,6 +601,8 @@ module.exports = {
                     },
                 },
             ]);
+
+            console.log(b2bCancellationOrderCount[0], "b2bCancellationOrderCount[0]");
             res.status(200).send({
                 b2bOrderCount: b2bOrderCount,
                 b2cOrderCount,
@@ -625,6 +628,25 @@ module.exports = {
 
             res.status(200).json({ message: "status changed" });
         } catch (err) {}
+    },
+    orderCancelStatusChange: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { type } = req.body;
+            if (type === "b2b") {
+                const b2bOrder = await B2BOrder.findByIdAndUpdate(id, {
+                    isCancellationViewed: true,
+                });
+            } else if (type === "b2c") {
+                const b2cOrder = await B2COrder.findByIdAndUpdate(id, {
+                    isCancellationViewed: true,
+                });
+            }
+
+            res.status(200).json({ message: "status changed" });
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
     },
 
     getAllCancelledOrders: async (req, res) => {

@@ -67,7 +67,7 @@ const admWhatsappServicesRouter = require("./settings/admWhatsappRouter");
 const admWhatsappManagementRouter = require("./settings/admWhatsappManagementRouter");
 const admNotitificationRouter = require("./notification/admNotificationRouter");
 const admOrderDashboardRouter = require("./dashboard/admDashboardRouter");
-const admEmailConfigRouter = require("./global/admEmailConfigRouter");
+// const admEmailConfigRouter = require("./global/admEmailConfigRouter");
 const admPromoCodeRouter = require("./global/admPromoCodeRouter");
 const admVendorRouter = require("./global/admVendorRouter");
 const admEmailReceiverConfigRouter = require("./global/admEmailReceiverConfigRouter");
@@ -75,6 +75,16 @@ const admAccountGroupRouter = require("./accounts/admAccountGroupRouter");
 const admAccountHeadRouter = require("./accounts/admAccountHeadRouter");
 const admAccountNatureRouter = require("./accounts/admAccountNatureRouter");
 const admAccountGlCodeRouter = require("./accounts/admAccountGlCodeRouter");
+//email
+
+const admEmailListRouter = require("./email/admEmailListRouter");
+const admEmailTemplateRouter = require("./email/admEmailTemplateRouter");
+const admEmailCampaignRouter = require("./email/admEmailCampaignRouter");
+const admEmailImageRouter = require("./email/admEmailImageRouter");
+const admEmailCampaignGroupRouter = require("./email/admEmailCampaignGroupRouter");
+const admEmailUnSubscriberRouter = require("./email/admEmailUnsubscribersRouter");
+const admEmailFooterRouter = require("./email/admEmailFooterRouter");
+const admEmailConfigRouter = require("./email/admEmailConfigRouter");
 
 module.exports = {
     admHomeRouter,
@@ -146,7 +156,6 @@ module.exports = {
     admWhatsappManagementRouter,
     admNotitificationRouter,
     admDashboardRouter,
-    admEmailConfigRouter,
     admPromoCodeRouter,
     admVendorRouter,
     admEmailReceiverConfigRouter,
@@ -154,4 +163,14 @@ module.exports = {
     admAccountHeadRouter,
     admAccountNatureRouter,
     admAccountGlCodeRouter,
+
+    //email
+    admEmailListRouter,
+    admEmailTemplateRouter,
+    admEmailCampaignRouter,
+    admEmailImageRouter,
+    admEmailCampaignGroupRouter,
+    admEmailUnSubscriberRouter,
+    admEmailFooterRouter,
+    admEmailConfigRouter,
 };

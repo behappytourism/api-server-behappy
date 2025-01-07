@@ -70,7 +70,7 @@ const {
     admWhatsappManagementRouter,
     admNotitificationRouter,
     admOrderDashboardRouter,
-    admEmailConfigRouter,
+    // admEmailConfigRouter,
     admPromoCodeRouter,
     admVendorRouter,
     admEmailReceiverConfigRouter,
@@ -78,6 +78,14 @@ const {
     admAccountGroupRouter,
     admAccountHeadRouter,
     admAccountGlCodeRouter,
+    admEmailListRouter,
+    admEmailTemplateRouter,
+    admEmailCampaignRouter,
+    admEmailImageRouter,
+    admEmailCampaignGroupRouter,
+    admEmailUnSubscriberRouter,
+    admEmailConfigRouter,
+    admEmailFooterRouter,
 } = require("./routes");
 const {
     admAttractionsRouter,
@@ -335,7 +343,7 @@ router.use("/notification", admNotitificationRouter);
 // frontend user getInTouch messages router
 router.use("/frontend/b2b/getInTouch", admB2bUsersGetInTouchRouter);
 router.use("/dashboard", admOrderDashboardRouter);
-router.use("/email-config", admEmailConfigRouter);
+// router.use("/email-config", admEmailConfigRouter);
 router.use("/email-receiver-config", admEmailReceiverConfigRouter);
 
 router.use("/promo-code", admPromoCodeRouter);
@@ -347,5 +355,16 @@ router.use("/account/head", admAccountHeadRouter);
 router.use("/account/nature", admAccountNatureRouter);
 router.use("/account/group", admAccountGroupRouter);
 router.use("/account/gl-code", admAccountGlCodeRouter);
+
+//email
+
+router.use("/email/list", admEmailListRouter);
+router.use("/email/template", admEmailTemplateRouter);
+router.use("/email/campaign", admEmailCampaignRouter);
+router.use("/email/image", admEmailImageRouter);
+router.use("/email/campaign/group", admEmailCampaignGroupRouter);
+router.use("/email/unsubscribe", admEmailUnSubscriberRouter);
+router.use("/email/configs", admEmailConfigRouter);
+router.use("/email/footers", admEmailFooterRouter);
 
 module.exports = router;
