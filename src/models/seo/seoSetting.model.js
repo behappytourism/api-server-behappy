@@ -9,7 +9,7 @@ const seoSettingsSchema = new Schema(
         seoType: {
             type: String,
             required: true,
-            // enum: ["landingPage", "products"],
+            enum: ["landingPage", "products"],
         },
         seoCategory: [
             {

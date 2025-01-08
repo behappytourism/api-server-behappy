@@ -168,7 +168,7 @@ const {
 router.use("/auth", admAuthRouter);
 router.use("/hotels/contracts", admHotelContractsRouter);
 
-router.use(adminAuth);
+// router.use(adminAuth);
 
 router.use("/attractions/tickets", admAttractionsTicketsRouter);
 router.use("/attractions/tickets/log", admAttractionTicketLogsRouter);
