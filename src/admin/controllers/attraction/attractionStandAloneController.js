@@ -38,15 +38,15 @@ module.exports = {
             }
 
             let images = [];
-            let image = req.files["images"];
-            if(!image || image?.length < 1) {
-                return sendErrorResponse(res, 400, "minimum 1 image is required")
-            } else {
-                for(let i = 0; i < image?.length; i++){
-                    const img = "/" + image[i]?.path?.replace(/\\/g, "/");
-                    images.push(img)
-                }
-            }
+            // let image = req.files["images"];
+            // if(!image || image?.length < 1) {
+            //     return sendErrorResponse(res, 400, "minimum 1 image is required")
+            // } else {
+            //     for(let i = 0; i < image?.length; i++){
+            //         const img = "/" + image[i]?.path?.replace(/\\/g, "/");
+            //         images.push(img)
+            //     }
+            // }
 
             const newAttractionStandAlone = new AttractionStandAlone({
                 title,
@@ -81,9 +81,9 @@ module.exports = {
 
             const attractionStandAlone = await AttractionStandAlone.find({
                 ...filters,
-                attraction: {
-                    $in: await Attraction.find().distinct("_id")
-                }
+                // attraction: {
+                //     $in: await Attraction.find().distinct("_id")
+                // }
             })
             .populate({
                 path: "attraction",
