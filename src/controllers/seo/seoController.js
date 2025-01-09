@@ -8,7 +8,7 @@ module.exports = {
             let title;
             let description;
             let keywords;
-            console.log(type, name, slug);
+            
             if (type === "products") {
                 const seoSetting = await SeoSetting.findOne(
                     {

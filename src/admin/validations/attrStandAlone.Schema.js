@@ -6,6 +6,7 @@ const attractionsStandAloneSchema = Joi.object({
     attractions: Joi.array().items().optional(),
     description: Joi.string().required(),
     images: Joi.array().optional(),
+    shortDesc: Joi.string().required(),
 });
 
 const attractionsStandAloneUpdateSchema = Joi.object({
@@ -14,6 +15,7 @@ const attractionsStandAloneUpdateSchema = Joi.object({
     description: Joi.string().required(),
     images: Joi.array().optional(),
     initialImg: Joi.array().optional(),
+    shortDesc: Joi.string().required(),
 });
 
 module.exports = {

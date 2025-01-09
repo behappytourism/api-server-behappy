@@ -735,6 +735,7 @@ module.exports = {
                                 // activities: "$activities",
                             },
                         },
+                        shortDesc: "$shortDesc",
                     },
                 },
             ]);
@@ -750,7 +751,7 @@ module.exports = {
             const { skip = 0, limit = 10 } = req.query;
 
             const standAlones = await AttractionStandAlone.find({ isDeleted: false }).select(
-                "title slug images description"
+                "title slug images shortDesc"
             );
             const totalStandAlones = await AttractionStandAlone.find({ isDeleted: false }).count();
 

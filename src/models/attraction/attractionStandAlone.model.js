@@ -14,8 +14,12 @@ const attractionStandAloneSchema = new Schema(
             type: String,
             required: true,
         },
+        shortDesc: {
+            type: String,
+            required: true,
+        },
         images: {
-            // type: [{ type: String, required: true }],
+            type: [{ type: String, required: true }],
         },
         attraction: {
             type: [{ type: Schema.Types.ObjectId, ref: "Attraction" }],
