@@ -735,7 +735,9 @@ module.exports = {
                                 // activities: "$activities",
                             },
                         },
-                        shortDesc: "$shortDesc",
+                        shortDesc: { $first: "$shortDesc" },
+
+                        // shortDesc: "$shortDesc",
                     },
                 },
             ]);
