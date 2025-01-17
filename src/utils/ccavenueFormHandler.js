@@ -1,4 +1,5 @@
 const nodeCCAvenue = require("node-ccavenue");
+const { createCcAvenueLog } = require("../helpers/ccAvenueLogHelper");
 
 const ccav = new nodeCCAvenue.Configure({
     merchant_id: process.env.CCAVENUE_MERCHANT_ID,
