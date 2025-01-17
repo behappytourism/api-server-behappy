@@ -49,7 +49,7 @@ const b2bOrderSchema = Joi.object({
     selectedActivities: Joi.array().items({
         activity: Joi.string().required(),
         date: Joi.date().required(),
-        adultsCount: Joi.number().required().min(1).precision(0),
+        adultsCount: Joi.number().required().min(0).precision(0),
         childrenCount: Joi.number().required().min(0).precision(0),
         infantCount: Joi.number().required().min(0).precision(0),
         hoursCount: Joi.number().allow("", null).min(1).precision(0),
