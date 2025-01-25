@@ -25,6 +25,8 @@ const {
     cancelB2bOrder,
     approveOrderB2bCancellationRequest,
     orderCancelStatusChange,
+    cancelB2cOrder,
+    approveOrderB2cCancellationRequest,
 } = require("../../controllers/orders/admOrdersController");
 
 router.get("/b2b/all", getAllOrders);
@@ -43,6 +45,9 @@ router.get("/b2b/cancel/all", getAllCancelledOrders);
 
 router.patch("/b2b/cancel/:orderId", cancelB2bOrder);
 router.patch("/b2b/cancel-approval/:cancellationId", approveOrderB2bCancellationRequest);
+
+router.patch("/b2c/cancel/:orderId", cancelB2cOrder);
+router.patch("/b2c/cancel-approval/:cancellationId", approveOrderB2cCancellationRequest);
 
 // router.get("/b2c/all", getAllB2cAttractionOrders);
 // router.get("/b2c/single/:orderId", getSingleB2cAttractionOrder);

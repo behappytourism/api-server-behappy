@@ -15,6 +15,7 @@ const {
     addFinancialData,
     updateFinancialData,
     getSingleUserFinacialData,
+    getWalletBalance,
     iosSignup,
 } = require("../../controllers/global/usersController");
 const userAuth = require("../../middlewares/userAuth");
@@ -47,6 +48,8 @@ const upload = multer({
 router.post("/signup", doSignup);
 router.post("/login", doLogin);
 router.get("/my-account", userAuth, getAccount);
+router.get("/wallet-balance", userAuth, getWalletBalance);
+
 router.patch("/update", userAuth, upload.single("avatar"), updateUser);
 router.patch("/update/password", userAuth, updatePassword);
 router.patch("/forget-password", forgetPassword);

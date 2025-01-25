@@ -1,4 +1,4 @@
-const Joi = require("joi")
+const Joi = require("joi");
 
 const b2cOrderSchema = Joi.object({
     // referenceNumber: Joi.string().required(),
@@ -67,7 +67,7 @@ const b2cOrderSchema = Joi.object({
         }).allow(null),
         isPromoAdded: Joi.boolean().allow("", null),
     }),
-    paymentMethod: Joi.string().required().allow("ccavenue"),
+    paymentMethod: Joi.string().required().allow("ccavenue", "wallet"),
 });
 
-module.exports = { b2cOrderSchema }
+module.exports = { b2cOrderSchema };

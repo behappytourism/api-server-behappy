@@ -32,12 +32,15 @@ const {
     B2CTransferOrderRefund,
     B2COrderCancellation,
     B2COrderRefund,
+    B2CWallet,
+    B2CTransaction,
 } = require("../../../models");
 const b2bOrderInvoice = require("../../../b2b/helpers/order/b2bOrderInvoice");
 const b2cOrderInvoice = require("../../../helpers/orders/b2cOrderInvoiceHelper");
 const { activityCancellationHelper } = require("../../helpers/attraction/attractionOrderHelper");
 const { addMoneyToB2bWallet } = require("../../../b2b/utils/wallet");
 const { b2bOrderCancellationSchema } = require("../../../b2b/validations/order/b2bOrder.schema");
+const addMoneyToB2cWallet = require("../../../utils/wallet/addMoneyToB2cWallet");
 
 module.exports = {
     getAllOrders: async (req, res) => {
@@ -1850,7 +1853,7 @@ module.exports = {
             let refundAmount = 0;
             let totalCancellationCharge = 0;
             if (b2cOrder.attractionId && attractionCancellations.length > 0) {
-                const attractionOrder = await B2BAttractionOrder.findOne({
+                const attractionOrder = await AttractionOrder.findOne({
                     _id: b2cOrder.attractionId,
                 })
                     .populate("user", "name email")
@@ -1862,7 +1865,6 @@ module.exports = {
                         path: "activities.activity",
                         select: "id name ",
                     });
-
                 if (!attractionOrder) {
                     return sendErrorResponse(res, 404, "attraction order not found");
                 }
@@ -1898,7 +1900,7 @@ module.exports = {
                         );
                     }
 
-                    let prevOrderCancellation = await B2BAttractionOrderCancellation.findOne({
+                    let prevOrderCancellation = await B2CAttractionOrderCancellation.findOne({
                         orderId: b2cOrder?.attractionId,
                         activityId: activityId,
                         $or: [
@@ -1907,7 +1909,6 @@ module.exports = {
                         ],
                     });
 
-                    console.log(prevOrderCancellation, "prevOrderCancellation");
 
                     if (prevOrderCancellation) {
                         return sendErrorResponse(
@@ -1917,11 +1918,12 @@ module.exports = {
                         );
                     }
 
-                    let orderCancellation = await B2BAttractionOrderCancellation.create({
+                   
+                    let orderCancellation = await B2CAttractionOrderCancellation.create({
                         cancellationRemark,
                         cancellationStatus: "pending",
                         orderId: attractionOrder._id,
-                        resellerId: attractionOrder?.user?._id,
+                        userId: attractionOrder?.user?._id,
                         cancelledBy: "admin",
                         activityId,
                         activity: actOrder.activity._id,
@@ -1954,7 +1956,7 @@ module.exports = {
                             note: "Attraction order cancelled by admin",
                             orderId: attractionOrder._id,
                             paymentMethod: "wallet",
-                            userId: attractionOrder?.user,
+                            userId: attractionOrder?.user?._id,
                             status: "pending",
                             activityId,
                             activity: actOrder.activity._id,
@@ -2008,7 +2010,7 @@ module.exports = {
                         );
                     }
 
-                    let prevOrderCancellation = await B2BTransferOrderCancellation.findOne({
+                    let prevOrderCancellation = await B2CTransferOrderCancellation.findOne({
                         orderId: b2cOrder.transferId,
                         transferId,
                         $or: [
@@ -2016,6 +2018,7 @@ module.exports = {
                             { cancellationStatus: "success" },
                         ],
                     });
+                    
                     if (prevOrderCancellation) {
                         return sendErrorResponse(
                             res,
@@ -2072,6 +2075,19 @@ module.exports = {
                 }
             }
 
+            let wallet = await B2CWallet.findOne({
+                user: b2cOrder.user,
+            });
+            if (!wallet) {
+                wallet = new B2CWallet({
+                    balance: refundAmount,
+                    user: b2cOrder.user,
+                });
+                await wallet.save();
+            } else {
+                await addMoneyToB2cWallet(wallet, refundAmount);
+            }
+
             orderCancellation.cancellationStatus = "success";
             orderCancellation.cancellationCharge = totalCancellationCharge;
             orderCancellation.cancellationRemark = cancellationRemark;
@@ -2102,7 +2118,7 @@ module.exports = {
                 await orderRefund.save();
             }
 
-            await B2BTransaction.create({
+            await B2CTransaction.create({
                 user: b2cOrder.user,
                 paymentProcessor: "wallet",
                 product: "all",

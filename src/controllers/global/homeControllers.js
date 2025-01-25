@@ -375,7 +375,6 @@ module.exports = {
                 recentBlogs = await Blog.find({ isDeleted: false })
                     .populate("category")
                     .sort({ createdAt: -1 })
-                    .limit(3)
                     .lean();
             }
 

@@ -62,7 +62,7 @@ const b2cOrderSchema = new Schema(
             type: String,
             required: true,
             lowercase: true,
-            enum: ["pending", "completed", "failed"],
+            enum: ["pending", "completed", "failed", "partially-cancelled", "cancelled"],
         },
         paymentState: {
             type: String,

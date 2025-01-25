@@ -8,6 +8,7 @@ const {
     B2COrderCancellation,
     B2CAttractionOrderCancellation,
     B2CTransferOrderCancellation,
+    B2CWallet,
 } = require("../../models");
 const {
     B2COrder,
@@ -56,6 +57,10 @@ module.exports = {
 
             if (error) return sendErrorResponse(res, 400, error.details[0].message);
             if (!isValidObjectId(country)) return sendErrorResponse(res, 400, "invalid country id");
+
+            if (!wallet && paymentMethod === "wallet") {
+                return sendErrorResponse(res, 400, "wallet amount not found for this user ");
+            }
 
             const countryDetails = await Country.findOne({
                 isocode: countryCode?.toUpperCase(),
@@ -231,8 +236,6 @@ module.exports = {
                     paymentStateMessage: "",
                 });
 
-             
-
                 return ccavenueFormHandler({
                     res,
                     totalAmount: netPrice,
@@ -240,6 +243,9 @@ module.exports = {
                     cancelUrl: `${process.env.SERVER_URL}/api/v1/orders/ccavenue/capture`,
                     orderId: b2cOrderPayment?._id,
                 });
+            } else if (paymentMethod === "wallet") {
+                if (Number(wallet.balance) > Number(netPrice)) {
+                }
             }
 
             res.status(200).json({
@@ -260,8 +266,6 @@ module.exports = {
             const { order_id, order_status } = decryptedJsonResponse;
 
             // const { order_id, order_status } = req.body;
-
-
 
             let totalProfit = 0;
             let totalCost = 0;

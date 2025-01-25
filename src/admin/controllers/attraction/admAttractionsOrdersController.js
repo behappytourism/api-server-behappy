@@ -17,6 +17,7 @@ const {
     B2CAttractionOrderCancellation,
     B2CAttractionOrderRefund,
     B2CTransaction,
+    B2CWallet,
 } = require("../../../models");
 const { getB2bOrders, generateB2bOrdersSheet } = require("../../../b2b/helpers/b2bOrdersHelper");
 const sendOrderConfirmationEmail = require("../../helpers/sendOrderConfirmationMail");
@@ -2061,6 +2062,7 @@ module.exports = {
             });
 
             if (!actOrder) {
+                85739;
                 return sendErrorResponse(res, 404, "activity  not found");
             }
 
@@ -2141,6 +2143,20 @@ module.exports = {
                     activity: actOrder.activity._id,
                     activityName: actOrder.activity.name,
                 });
+
+                let wallet = await B2CWallet.findOne({
+                    user: attractionOrder.user,
+                });
+                if (!wallet) {
+                    wallet = new B2CWallet({
+                        balance: refundAmount,
+                        user: attractionOrder.user,
+                    });
+                    await wallet.save();
+                } else {
+                    wallet.balance += refundAmount;
+                    await wallet.save();
+                }
 
                 attOrderRefund.status = "success";
                 await attOrderRefund.save();
@@ -2265,6 +2281,20 @@ module.exports = {
                     activity: actOrder.activity._id,
                     activityName: actOrder.activity.name,
                 });
+
+                let wallet = await B2CWallet.findOne({
+                    user: attractionOrder.user,
+                });
+                if (!wallet) {
+                    wallet = new B2CWallet({
+                        balance: refundAmount,
+                        user: attractionOrder.user,
+                    });
+                    await wallet.save();
+                } else {
+                    wallet.balance += refundAmount;
+                    await wallet.save();
+                }
 
                 attOrderRefund.status = "success";
                 await attOrderRefund.save();

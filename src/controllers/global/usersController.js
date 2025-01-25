@@ -1,7 +1,14 @@
 const { compare, hash } = require("bcryptjs");
 
 const { sendErrorResponse, sendMobileOtp } = require("../../helpers");
-const { User, Country, Subscriber, FinancialUserData, AffiliateUser } = require("../../models");
+const {
+    User,
+    Country,
+    Subscriber,
+    FinancialUserData,
+    AffiliateUser,
+    B2CWallet,
+} = require("../../models");
 const {
     userLoginSchema,
     userEmailLoginSchema,
@@ -222,6 +229,17 @@ module.exports = {
                 isAffiliate: affiliate ? true : false,
                 affiliateCode: affiliate ? affiliate.affiliateCode : "",
             });
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
+    },
+    getWalletBalance: async (req, res) => {
+        try {
+            const wallet = await B2CWallet.findOne({
+                user: req.user._id,
+            });
+
+            res.status(200).json(wallet);
         } catch (err) {
             sendErrorResponse(res, 500, err);
         }
