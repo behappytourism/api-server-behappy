@@ -31,6 +31,8 @@ const { completeOrderAfterPayment } = require("../../helpers/attractionOrderHelp
 const { transferOrderCompletHelpers } = require("../../helpers/orders/transferOrderHelper");
 const b2cOrderInvoice = require("../../helpers/orders/b2cOrderInvoiceHelper");
 const { B2BAttractionOrderPayment } = require("../../b2b/models/attraction");
+const checkWalletB2cBalance = require("../../utils/wallet/checkWalletB2cBalance");
+const deductMoneyFromB2cWallet = require("../../utils/wallet/deductMoneyB2cWallet");
 const sendOrderEmail = require("../../b2b/helpers/order/b2bOrderEmail");
 
 const ccav = new nodeCCAvenue.Configure({
@@ -58,6 +60,9 @@ module.exports = {
             if (error) return sendErrorResponse(res, 400, error.details[0].message);
             if (!isValidObjectId(country)) return sendErrorResponse(res, 400, "invalid country id");
 
+            let wallet = await B2CWallet.findOne({
+                user: req?.user,
+            });
             if (!wallet && paymentMethod === "wallet") {
                 return sendErrorResponse(res, 400, "wallet amount not found for this user ");
             }
@@ -245,6 +250,31 @@ module.exports = {
                 });
             } else if (paymentMethod === "wallet") {
                 if (Number(wallet.balance) > Number(netPrice)) {
+                    res.status(200).json({
+                        message: "order has been created",
+                        orderId: b2cOrder?._id,
+                        payableAmount: b2cOrder?.netPrice,
+                    });
+                } else if (Number(wallet.balance) < Number(netPrice)) {
+                    let ccAvenuePayable = Number(netPrice) - Number(wallet.balance);
+
+                    const b2cOrderPayment = await B2COrderPayment.create({
+                        amount: netPrice,
+                        orderId: b2cOrder?._id,
+                        paymentState: "pending",
+                        user: buyer?._id,
+                        paymentMethod: "ccavenue-wallet",
+                        paymentStateMessage: "",
+                        walletAmount: wallet.balance,
+                    });
+
+                    return ccavenueFormHandler({
+                        res,
+                        totalAmount: ccAvenuePayable,
+                        redirectUrl: `${process.env.SERVER_URL}/api/v1/orders/ccavenue/capture`,
+                        cancelUrl: `${process.env.SERVER_URL}/api/v1/orders/ccavenue/capture`,
+                        orderId: b2cOrderPayment?._id,
+                    });
                 }
             }
 
@@ -259,13 +289,227 @@ module.exports = {
         }
     },
 
+    completeB2cOrder: async (req, res) => {
+        try {
+            const { otp, orderId } = req.body;
+            let totalProfit = 0;
+            let totalCost = 0;
+            if (!isValidObjectId(orderId)) {
+                return sendErrorResponse(res, 400, "Invalid order id");
+            }
+
+            const b2cOrder = await B2COrder.findOne({
+                _id: orderId,
+            });
+            totalProfit += Number(b2cOrder?.netProfit || 0);
+            totalCost += Number(b2cOrder?.netCost) || 0;
+
+            if (!b2cOrder) {
+                return sendErrorResponse(res, 400, "order not found");
+            }
+
+            if (b2cOrder?.orderStatus === "completed") {
+                return sendErrorResponse(res, 400, "sorry, you have already completed this order!");
+            }
+
+            let totalAmount = b2cOrder.netPrice;
+
+            let wallet = await B2CWallet.findOne({
+                user: req.user,
+            });
+
+            const balanceAvailable = checkWalletBalance(wallet, totalAmount);
+            if (!balanceAvailable) {
+                let reseller = req.reseller;
+                sendInsufficentBalanceMail(reseller);
+                return sendErrorResponse(
+                    res,
+                    400,
+                    "insufficient balance. please reacharge and try again"
+                );
+            }
+
+            const orderPayment = await B2COrderPayment.create({
+                amount: totalAmount,
+                orderId: b2cOrder?._id,
+                paymentState: "pending",
+                user: req.user?._id,
+                paymentMethod: "wallet",
+                paymentStateMessage: "",
+            });
+
+            let transferOrderPayment;
+            let attractionPayment;
+            let attractionOrder;
+            let transferOrder;
+
+            if (b2cOrder.attractionId) {
+                attractionOrder = await AttractionOrder.findOne({
+                    _id: b2cOrder.attractionId,
+                    user: b2cOrder?.user,
+                }).populate({
+                    path: "activities.activity",
+                    populate: {
+                        path: "attraction",
+                        populate: {
+                            path: "destination",
+                        },
+                    },
+                });
+
+                if (!attractionOrder) {
+                    return sendErrorResponse(res, 400, "attraction order not found!");
+                }
+
+                if (
+                    attractionOrder.orderStatus === "completed" ||
+                    attractionOrder.paymentState === "fully-paid"
+                ) {
+                    return sendErrorResponse(
+                        res,
+                        400,
+                        "sorry, you have already completed this order!"
+                    );
+                }
+
+                try {
+                    await completeOrderAfterPayment(attractionOrder);
+                } catch (err) {
+                    return sendErrorResponse(res, 400, err);
+                }
+
+                attractionPayment = await B2CAttractionOrderPayment({
+                    amount: attractionOrder.totalAmount,
+                    orderId: attractionOrder?._id,
+                    paymentState: "pending",
+                    userId: b2cOrder?.user,
+                    paymentMethod: "ccavenue",
+                    paymentStateMessage: "",
+                });
+                await attractionPayment.save();
+
+                attractionOrder.otp = "";
+                attractionOrder.orderStatus = "completed";
+                attractionOrder.paymentState = "fully-paid";
+            }
+
+            if (b2cOrder.transferId) {
+                transferOrder = await B2CTransferOrder.findOne({
+                    _id: b2cOrder.transferId,
+                    user: b2cOrder.user,
+                });
+
+                if (!transferOrder) return sendErrorResponse(res, 400, "transfer order not found!");
+
+                try {
+                    transferOrder = await transferOrderCompletHelpers({ transferOrder });
+                } catch (err) {
+                    return sendErrorResponse(res, 400, err);
+                }
+
+                transferOrderPayment = await B2CTransferOrderPayment.create({
+                    amount: transferOrder?.totalNetFare,
+                    orderId: transferOrder?._id,
+                    paymentState: "pending",
+                    user: b2cOrder?.user,
+                    paymentMethod: "ccavenue",
+                    paymentStateMessage: "",
+                });
+
+                transferOrder.paymentState = "fully-paid";
+                transferOrder.status = "completed";
+                await transferOrder.save();
+            }
+            try {
+                await deductAmountFromWallet(wallet, totalAmount);
+            } catch (err) {
+                orderPayment.paymentState = "failed";
+                await orderPayment.save();
+
+                return sendErrorResponse(res, 400, "wallet deduction failed, please try again");
+            }
+
+            if (b2cOrder.attractionId) {
+                await attractionOrder.save();
+
+                for (let i = 0; i < attractionOrder?.activities.length; i++) {
+                    let activity = attractionOrder?.activities[i];
+                    console.log(activity, "activity");
+                    totalCost += Number(activity.totalCost);
+                    totalProfit += Number(activity.profit);
+                }
+
+                attractionPayment.paymentState = "success";
+                await attractionPayment.save();
+            }
+
+            if (b2cOrder.transferId) {
+                await transferOrder.save();
+                transferOrderPayment.paymentState = "success";
+                await transferOrderPayment.save();
+            }
+
+            orderPayment.paymentState = "success";
+            await orderPayment.save();
+
+            await B2CTransaction.create({
+                user: b2cOrder?.user,
+                paymentProcessor: "ccavenue",
+                product: "all",
+                processId: b2cOrder?._id,
+                description: `order payment`,
+                directAmount: b2cOrder.netPrice,
+                remark: "order payment",
+                dateTime: new Date(),
+            });
+
+            b2cOrder.paymentState = "fully-paid";
+            b2cOrder.orderStatus = "completed";
+            b2cOrder.netProfit = Number(totalProfit);
+            b2cOrder.netCost = Number(totalCost);
+            await b2cOrder.save();
+
+            sendOrderEmail({
+                product: "attraction",
+                action: "order",
+                subject: "Order Placed Successfully",
+                name: b2cOrder.name,
+                email: b2cOrder.email,
+                order: b2cOrder,
+                attractionOrder: attractionOrder,
+                transferOrder: transferOrder,
+                orderedBy: "b2c",
+            });
+
+            sendOrderEmail({
+                product: "attraction",
+                action: "order",
+                subject: `New Order From B2C - ${b2cOrder.referenceNumber}`,
+                name: b2cOrder.name,
+                email: "confirmations@behappytourism.com",
+                order: b2cOrder,
+                attractionOrder: attractionOrder,
+                transferOrder: transferOrder,
+                orderedBy: "b2c",
+            });
+            res.status(200).json({
+                message: "order successfully placed",
+                referenceNumber: b2cOrder.referenceNumber,
+                _id: b2cOrder?._id,
+            });
+        } catch (err) {
+            console.log(err);
+            sendErrorResponse(res, 500, err);
+        }
+    },
+
     captureCCAvenueOrderPayment: async (req, res) => {
         try {
-            const { encResp } = req.body;
-            const decryptedJsonResponse = ccav.redirectResponseToJson(encResp);
-            const { order_id, order_status } = decryptedJsonResponse;
+            // const { encResp } = req.body;
+            // const decryptedJsonResponse = ccav.redirectResponseToJson(encResp);
+            // const { order_id, order_status } = decryptedJsonResponse;
 
-            // const { order_id, order_status } = req.body;
+            const { order_id, order_status } = req.body;
 
             let totalProfit = 0;
             let totalCost = 0;
@@ -283,6 +527,21 @@ module.exports = {
             });
 
             if (!b2cOrder) return sendErrorResponse(res, 400, "order not found!");
+
+            let wallet = await B2CWallet.findOne({
+                user: b2cOrder?.user,
+            });
+
+            console.log(wallet, "wallet");
+            if (orderPayment?.paymentMethod === "ccavenue-wallet") {
+                const balanceAvailable = checkWalletB2cBalance(
+                    wallet,
+                    Number(orderPayment?.walletAmount)
+                );
+                if (!balanceAvailable) {
+                    return sendErrorResponse(res, 400, "insufficient wallet balance. ");
+                }
+            }
 
             totalProfit += Number(b2cOrder?.netProfit || 0);
             totalCost += Number(b2cOrder?.netCost) || 0;
@@ -382,6 +641,25 @@ module.exports = {
                     transferOrder.paymentState = "fully-paid";
                     transferOrder.status = "completed";
                     await transferOrder.save();
+                }
+
+                if (orderPayment?.paymentMethod === "ccavenue-wallet") {
+                    try {
+                        console.log(
+                            Number(orderPayment?.amount) - Number(orderPayment?.walletAmount),
+                            "ooooooooooooooooo"
+                        );
+                        await deductMoneyFromB2cWallet(wallet, Number(orderPayment?.walletAmount));
+                    } catch (err) {
+                        orderPayment.paymentState = "failed";
+                        await orderPayment.save();
+
+                        return sendErrorResponse(
+                            res,
+                            400,
+                            "wallet deduction failed, please try again"
+                        );
+                    }
                 }
 
                 if (b2cOrder.attractionId) {
