@@ -619,4 +619,20 @@ module.exports = {
             sendErrorResponse(res, 500, err);
         }
     },
+
+    getReviews: async (req, res) => {
+        try {
+            const home = await B2cHomeSettings.findOne({
+                settingsNumber: 1,
+            }).lean();
+
+            if (!home) {
+                return sendErrorResponse(res, 404, "Review details not added");
+            }
+
+            res.status(200).json(home?.reviews || []);
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
+    },
 };

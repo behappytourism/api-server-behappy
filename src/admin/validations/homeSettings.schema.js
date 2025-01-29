@@ -49,6 +49,14 @@ const homeHeroSettingsSchema = Joi.object({
     image: Joi.string().allow("", null),
 });
 
+const homeReviewSettingsSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().required(),
+    place: Joi.string().required(),
+    image: Joi.string().allow("", null),
+    rating: Joi.string().required(),
+});
+
 const homeCardSettingsSchema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().required(),
@@ -65,4 +73,5 @@ module.exports = {
     homeHeroSettingsSchema,
     homeCardSettingsSchema,
     homeSectionsSettingsSchema,
+    homeReviewSettingsSchema,
 };

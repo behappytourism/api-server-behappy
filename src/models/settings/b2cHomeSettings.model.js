@@ -175,6 +175,32 @@ const b2cHomeSettingsSchema = new Schema(
         aboutUs: {
             type: String,
         },
+        reviews: {
+            type: [
+                {
+                    name: {
+                        type: String,
+                        required: true,
+                    },
+                    description: {
+                        type: String,
+                        required: true,
+                    },
+                    image: {
+                        type: String,
+                        required: true,
+                    },
+                    place: {
+                        type: String,
+                        required: true,
+                    },
+                    rating: {
+                        type: String,
+                        required: true,
+                    },
+                },
+            ],
+        },
     },
     { timestamps: true }
 );

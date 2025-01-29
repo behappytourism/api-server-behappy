@@ -9,6 +9,7 @@ const {
     homeCardSettingsSchema,
     homeMetaSettingsSchema,
     homeSectionsSettingsSchema,
+    homeReviewSettingsSchema,
 } = require("../../validations/homeSettings.schema");
 
 module.exports = {
@@ -849,6 +850,135 @@ module.exports = {
             res.status(200).json({ aboutUs: b2bSettings?.aboutUs });
         } catch (error) {
             res.status(500).json({ error: "Internal Server Error" });
+        }
+    },
+
+    addHomeReviews: async (req, res) => {
+        try {
+            const { name, rating, description, place } = req.body;
+
+            const { _, error } = homeReviewSettingsSchema.validate(req.body);
+            if (error) {
+                return sendErrorResponse(res, 400, error.details[0].message);
+            }
+
+            if (!req.file) {
+                return sendErrorResponse(res, 400, "Image is required");
+            }
+
+            let image;
+            if (req.file?.path) {
+                image = "/" + req.file.path.replace(/\\/g, "/");
+            }
+
+            const home = await B2cHomeSettings.findOneAndUpdate(
+                { settingsNumber: 1 },
+                {
+                    $push: { reviews: { name, rating, description, image, place } },
+                },
+                { upsert: true, new: true, runValidators: true }
+            );
+
+            res.status(200).json(home.reviews[home.reviews?.length - 1]);
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
+    },
+
+    updateHomeReviews: async (req, res) => {
+        try {
+            const { reviewId } = req.params;
+            const { name, description, place, rating } = req.body;
+
+            const { _, error } = homeReviewSettingsSchema.validate(req.body);
+            if (error) {
+                return sendErrorResponse(res, 400, error.details[0].message);
+            }
+
+            if (!isValidObjectId(reviewId)) {
+                return sendErrorResponse(res, 400, "Invalid review Id");
+            }
+
+            let image;
+            if (req.file?.path) {
+                image = "/" + req.file.path.replace(/\\/g, "/");
+            }
+
+            const review = await B2cHomeSettings.findOneAndUpdate(
+                {
+                    settingsNumber: 1,
+                    "reviews._id": reviewId,
+                },
+                {
+                    "reviews.$.name": name,
+                    "reviews.$.description": description,
+                    "reviews.$.place": place,
+                    "reviews.$.image": image,
+                    "reviews.$.rating": rating,
+                },
+                { new: true, runValidators: true }
+            );
+
+            if (!review) {
+                return sendErrorResponse(res, 400, "review not found");
+            }
+
+            const objIndex = review.reviews?.findIndex((review) => {
+                return review?._id?.toString() === reviewId?.toString();
+            });
+
+            res.status(200).json(review.reviews[objIndex]);
+        } catch (err) {
+            console.log(err);
+            sendErrorResponse(res, 500, err);
+        }
+    },
+
+    deleteHomeReviews: async (req, res) => {
+        try {
+            const { reviewId } = req.params;
+
+            if (!isValidObjectId(reviewId)) {
+                return sendErrorResponse(res, 400, "Invalid reivew Id");
+            }
+
+            const review = await B2cHomeSettings.findOneAndUpdate(
+                { settingsNumber: 1, "reviews._id": reviewId },
+                {
+                    $pull: { reviews: { _id: reviewId } },
+                },
+                {
+                    new: true,
+                }
+            );
+
+            if (!review) {
+                return sendErrorResponse(res, 404, "Hero not found");
+            }
+
+            res.status(200).json({
+                message: "Review successfully deleted",
+                _id: reviewId,
+            });
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
+        }
+    },
+
+    getReviews: async (req, res) => {
+        try {
+            const home = await B2cHomeSettings.findOne({
+                settingsNumber: 1,
+            });
+            if (!home) {
+                return sendErrorResponse(res, 404, "Home not found");
+            }
+
+            res.status(200).json({
+                reviews: home?.reviews,
+            });
+        } catch (err) {
+            sendErrorResponse(res, 500, err);
         }
     },
 };

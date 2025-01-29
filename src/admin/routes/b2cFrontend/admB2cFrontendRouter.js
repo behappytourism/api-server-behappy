@@ -32,6 +32,10 @@ const {
     getFrontendSettings,
     getAboutUs,
     upsertAboutUs,
+    addHomeReviews,
+    updateHomeReviews,
+    getReviews,
+    deleteHomeReviews,
 } = require("../../controllers/b2cFrontend/b2cFrontendHomeSettingsRouter");
 
 const storage = multer.diskStorage({
@@ -66,6 +70,7 @@ const multipleUplaod = upload.fields([
 
 router.post("/heros/add", upload.single("image"), addHomeHeros);
 router.post("/cards/add", multipleUplaod, addHomeCard);
+router.post("/reviews/add", upload.single("image"), addHomeReviews);
 
 router.patch("/logo/update", upload.single("logo"), updateHomeLogo);
 router.patch("/meta/update", updateMetaDetails);
@@ -73,15 +78,19 @@ router.patch("/sections/update", updateHomeSections);
 router.patch("/footer/update", updateHomeFooter);
 router.patch("/heros/update/:heroId", upload.single("image"), updateHomeHero);
 router.patch("/cards/update/:cardId", multipleUplaod, updateHomeCard);
+router.patch("/reviews/update/:reviewId", upload.single("image"), updateHomeReviews);
 
 router.delete("/cards/delete/:cardId", deleteHomeCard);
 router.delete("/heros/delete/:heroId", deleteHomeHero);
+router.delete("/reviews/delete/:reviewId", deleteHomeReviews);
 
 router.get("/logo", getLogo);
 router.get("/cards", getAllCards);
 router.get("/meta-details", getMetaDetails);
 router.get("/footer", getFooter);
 router.get("/heros", getHeros);
+router.get("/reviews", getReviews);
+
 router.get("/cards/:cardId", getSingleCard);
 router.get("/sections", getSections);
 

@@ -60,9 +60,11 @@ module.exports = {
             if (error) return sendErrorResponse(res, 400, error.details[0].message);
             if (!isValidObjectId(country)) return sendErrorResponse(res, 400, "invalid country id");
 
+            console.log(req?.user , "req?.user")
             let wallet = await B2CWallet.findOne({
                 user: req?.user,
             });
+
             if (!wallet && paymentMethod === "wallet") {
                 return sendErrorResponse(res, 400, "wallet amount not found for this user ");
             }
