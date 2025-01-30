@@ -17,20 +17,25 @@ module.exports = {
                 return sendErrorResponse(res, 400, "email verifcation gone wrong");
             }
 
-            let email = emailCampaign.emails.find((email) => email.hashedEmail == direct);
+            console.log(emailCampaign, "email camp");
+            let singleEmail = emailCampaign.emails.find((email) => email.hashedEmail == direct);
 
-            if (!email) {
+            if (!singleEmail) {
                 return sendErrorResponse(res, 400, "email verifcation gone wrong");
             }
 
-            const existingUnsubscriber = await EmailUnsubscriber.findOne({ email: email });
+            console.log(singleEmail?.email, "email");
+
+            const existingUnsubscriber = await EmailUnsubscriber.findOne({
+                email: singleEmail?.email,
+            });
             if (existingUnsubscriber) {
                 return sendErrorResponse(res, 400, "email already unsubscribed");
             }
 
             const emailUnsubscriber = await EmailUnsubscriber.findOneAndUpdate(
-                { email: email },
-                { email },
+                { email: singleEmail?.email },
+                { email: singleEmail?.email },
                 { new: true, runValidators: true, upsert: true }
             );
 
@@ -39,11 +44,12 @@ module.exports = {
             }
 
             res.status(200).json({
-                email: email,
+                email: singleEmail?.email,
                 unSubscride: true,
                 message: "email has been unsubscribed successfully",
             });
         } catch (err) {
+            console.log(err, "error");
             sendErrorResponse(res, 500, err);
         }
     },
@@ -62,18 +68,14 @@ module.exports = {
                 return sendErrorResponse(res, 400, "email verifcation gone wrong");
             }
 
-            let email = emailCampaign.emails.find((email) => email.hashedEmail == direct);
+            let singleEmail = emailCampaign.emails.find((email) => email.hashedEmail == direct);
 
-            if (!email) {
+            if (!singleEmail) {
                 return sendErrorResponse(res, 400, "email verifcation gone wrong");
             }
 
-            if (!email) {
-                return sendErrorResponse(res, 400, "email is required");
-            }
-
             const emailUnsubscriber = await EmailUnsubscriber.findOneAndDelete({
-                email: email,
+                email: singleEmail?.email,
             });
 
             if (!emailUnsubscriber) {
