@@ -26,6 +26,7 @@ const start = async () => {
         // This fn will call only in the 0th instance
         if (process.env.NODE_APP_INSTANCE === "0") {
             cronObj.sendHotelPromotionExpireMail();
+            cronObj.emailCampaginPromotionMail();
         }
 
         // getPromoCodes();
