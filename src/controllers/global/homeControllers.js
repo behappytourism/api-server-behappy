@@ -395,7 +395,43 @@ module.exports = {
                 .sort({ countryName: 1 })
                 // .collation({ locale: "en", caseLevel: true })
                 .lean();
-            const destinations = await Destination.find({ isDeleted: false }).lean();
+
+            const destinations = await Destination.aggregate([
+                {
+                    $match: { isDeleted: false }, // Filter only non-deleted destinations
+                },
+                {
+                    $lookup: {
+                        from: "attractions", // Collection name for attractions
+                        let: { destinationId: "$_id" }, // Pass the destination _id
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ["$destination", "$$destinationId"] }, // Match destinationId
+                                            { $eq: ["$isDeleted", false] }, // Only include non-deleted attractions
+                                        ],
+                                    },
+                                },
+                            },
+                        ],
+                        as: "attractions",
+                    },
+                },
+                {
+                    $addFields: {
+                        attractionCount: { $size: "$attractions" }, // Count the attractions
+                    },
+                },
+                {
+                    $project: {
+                        attractions: 0, 
+                    },
+                },
+            ]);
+
+
             const currencies = await Currency.find({})
                 .populate("country", "countryName flag")
                 .lean();
