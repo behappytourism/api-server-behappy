@@ -22,6 +22,8 @@ const transferRouter = require("./transfer/transferAvailabilityRouter");
 const attrStandAloneRouter = require("./attraction/attrStandAloneRouter");
 const b2cFrontendRouter = require("./global/b2cFrontendRouter");
 const b2cTransferOrderRouter = require("./transfer/transferOrderRouter");
+const emailUnsubscribeRouter = require("./email/emailUnsubscribeRouter");
+
 module.exports = {
     homeRouter,
     usersRouter,
@@ -47,4 +49,5 @@ module.exports = {
     attrStandAloneRouter,
     b2cFrontendRouter,
     b2cTransferOrderRouter,
+    emailUnsubscribeRouter,
 };
