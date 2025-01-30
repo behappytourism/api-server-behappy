@@ -11,6 +11,7 @@ const {
     completeProfitDetailWhatsappHelper,
 } = require("./admin/helpers/whatsapp/admWhatsappHelper");
 const { hotelPromotionExpiryMail } = require("./b2b/helpers/hotel/email/hotelPromotionExpiryMail");
+const { sendEmailCampaignPromotions } = require("./admin/helpers/email/emailCampaignSenderHelper");
 
 class CronJob {
     deleteHotelSearchResults() {
@@ -83,6 +84,12 @@ class CronJob {
             } else {
                 console.log(`Mails sent count: 0`);
             }
+        });
+    }
+
+    async emailCampaginPromotionMail() {
+        cron.schedule("* * * * *", async function () {
+            await sendEmailCampaignPromotions();
         });
     }
 }
