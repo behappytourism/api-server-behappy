@@ -11,6 +11,9 @@ const sendEmailPromotion = async ({ email, subject, text, attachments, emailConf
                 user: emailConfig ? emailConfig?.email : process.env.EMAIL,
                 pass: emailConfig ? emailConfig?.password : process.env.PASSWORD,
             },
+            tls: {
+                rejectUnauthorized: false,
+            },
         });
 
         await transporter.sendMail({
