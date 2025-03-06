@@ -507,11 +507,11 @@ module.exports = {
 
     captureCCAvenueOrderPayment: async (req, res) => {
         try {
-            // const { encResp } = req.body;
-            // const decryptedJsonResponse = ccav.redirectResponseToJson(encResp);
-            // const { order_id, order_status } = decryptedJsonResponse;
+            const { encResp } = req.body;
+            const decryptedJsonResponse = ccav.redirectResponseToJson(encResp);
+            const { order_id, order_status } = decryptedJsonResponse;
 
-            const { order_id, order_status } = req.body;
+            // const { order_id, order_status } = req.body;
 
             let totalProfit = 0;
             let totalCost = 0;
@@ -647,10 +647,7 @@ module.exports = {
 
                 if (orderPayment?.paymentMethod === "ccavenue-wallet") {
                     try {
-                        console.log(
-                            Number(orderPayment?.amount) - Number(orderPayment?.walletAmount),
-                            "ooooooooooooooooo"
-                        );
+                     
                         await deductMoneyFromB2cWallet(wallet, Number(orderPayment?.walletAmount));
                     } catch (err) {
                         orderPayment.paymentState = "failed";
