@@ -1,7 +1,6 @@
 const deductMoneyFromB2cWallet = async (wallet, amount) => {
     try {
         const tmpAmount = Number(amount);
-        console.log(tmpAmount, "tpAmoun");
         if (tmpAmount > 0) {
             wallet.balance -= tmpAmount;
             await wallet.save();

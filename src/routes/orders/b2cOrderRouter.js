@@ -8,10 +8,12 @@ const {
     downloadOrderInvoice,
     getSingleB2cAllOrdersSheet,
     cancelB2cOrder,
+    completeB2cOrder,
 } = require("../../controllers/order/orderController");
 const { userAuthOrNot, userAuth } = require("../../middlewares");
 
 router.post("/create", userAuthOrNot, createB2cOrder);
+router.post("/complete", userAuth, completeB2cOrder);
 router.post("/ccavenue/capture", captureCCAvenueOrderPayment);
 router.get("/list/all", userAuth, getAllOrders);
 router.get("/single/:id", getSingleOrder);

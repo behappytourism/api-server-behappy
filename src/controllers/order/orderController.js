@@ -60,12 +60,12 @@ module.exports = {
             if (error) return sendErrorResponse(res, 400, error.details[0].message);
             if (!isValidObjectId(country)) return sendErrorResponse(res, 400, "invalid country id");
 
-            console.log(req?.user , "req?.user")
+            console.log(req?.user, "req?.user");
             let wallet = await B2CWallet.findOne({
                 user: req?.user,
             });
 
-            if (!wallet && paymentMethod === "wallet") {
+            if (!wallet && (paymentMethod === "wallet" || paymentMethod === "wallet-ccavenue")) {
                 return sendErrorResponse(res, 400, "wallet amount not found for this user ");
             }
 
@@ -251,13 +251,17 @@ module.exports = {
                     orderId: b2cOrderPayment?._id,
                 });
             } else if (paymentMethod === "wallet") {
-                if (Number(wallet.balance) > Number(netPrice)) {
+                if (Number(wallet.balance) >= Number(netPrice)) {
                     res.status(200).json({
                         message: "order has been created",
                         orderId: b2cOrder?._id,
                         payableAmount: b2cOrder?.netPrice,
                     });
-                } else if (Number(wallet.balance) < Number(netPrice)) {
+                } else {
+                    return sendErrorResponse(res, 400, "wallet balance is less than total price");
+                }
+            } else if (paymentMethod === "ccavenue-wallet") {
+                if (Number(wallet.balance) < Number(netPrice)) {
                     let ccAvenuePayable = Number(netPrice) - Number(wallet.balance);
 
                     const b2cOrderPayment = await B2COrderPayment.create({
@@ -277,14 +281,16 @@ module.exports = {
                         cancelUrl: `${process.env.SERVER_URL}/api/v1/orders/ccavenue/capture`,
                         orderId: b2cOrderPayment?._id,
                     });
+                } else {
+                    return sendErrorResponse(
+                        res,
+                        400,
+                        "wallet balance is greater than total price"
+                    );
                 }
+            } else {
+                return sendErrorResponse(res, 400, "choose correct payment method");
             }
-
-            res.status(200).json({
-                message: "order has been created",
-                orderId: b2cOrder?._id,
-                payableAmount: b2cOrder?.netPrice,
-            });
         } catch (err) {
             console.log(err);
             sendErrorResponse(res, 500, err);
@@ -320,10 +326,10 @@ module.exports = {
                 user: req.user,
             });
 
-            const balanceAvailable = checkWalletBalance(wallet, totalAmount);
+            const balanceAvailable = await checkWalletB2cBalance(wallet, totalAmount);
             if (!balanceAvailable) {
                 let reseller = req.reseller;
-                sendInsufficentBalanceMail(reseller);
+                // sendInsufficentBalanceMail(reseller);
                 return sendErrorResponse(
                     res,
                     400,
@@ -423,7 +429,7 @@ module.exports = {
                 await transferOrder.save();
             }
             try {
-                await deductAmountFromWallet(wallet, totalAmount);
+                await deductMoneyFromB2cWallet(wallet, totalAmount);
             } catch (err) {
                 orderPayment.paymentState = "failed";
                 await orderPayment.save();
@@ -647,7 +653,6 @@ module.exports = {
 
                 if (orderPayment?.paymentMethod === "ccavenue-wallet") {
                     try {
-                     
                         await deductMoneyFromB2cWallet(wallet, Number(orderPayment?.walletAmount));
                     } catch (err) {
                         orderPayment.paymentState = "failed";
