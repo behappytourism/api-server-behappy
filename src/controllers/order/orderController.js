@@ -52,6 +52,7 @@ module.exports = {
                 selectedJourneys,
                 selectedActivities,
                 paymentMethod,
+                specialRequest,
                 // referenceNumber,
             } = req.body;
 
@@ -231,6 +232,7 @@ module.exports = {
                 orderStatus: "pending",
                 paymentState: "non-paid",
                 referenceNumber: refNumber,
+                specialRequest,
             });
 
             if (paymentMethod === "ccavenue") {

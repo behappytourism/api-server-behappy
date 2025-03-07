@@ -86,6 +86,7 @@ const {
     admEmailUnSubscriberRouter,
     admEmailConfigRouter,
     admEmailFooterRouter,
+    admB2cWalletsRouter,
 } = require("./routes");
 const {
     admAttractionsRouter,
@@ -168,7 +169,7 @@ const {
 router.use("/auth", admAuthRouter);
 router.use("/hotels/contracts", admHotelContractsRouter);
 
-// router.use(adminAuth);
+router.use(adminAuth);
 
 router.use("/attractions/tickets", admAttractionsTicketsRouter);
 router.use("/attractions/tickets/log", admAttractionTicketLogsRouter);
@@ -190,7 +191,6 @@ router.use("/subscribers", admSubscribersRouter);
 router.use("/countries", admCountriesRouter);
 router.use("/destinations", admDestinationsRouter);
 router.use("/general", admGeneralRouter);
-router.use("/users", admUsersRouter);
 router.use("/users", admUsersRouter);
 router.use("/drivers", admDriversRouter);
 router.use("/drivers/license-types", admLicenseTypesRouter);
@@ -237,6 +237,8 @@ router.use("/visa/application", admVisaApplicationRouter);
 router.use("/visa/markup", admVisaMarkupRouter);
 router.use("/visa", admVisaRouter);
 router.use("/wallets/b2b", admB2bWalletsRouter);
+router.use("/wallets/b2c", admB2cWalletsRouter);
+
 router.use("/wallets/deposit-requests", admB2bWalletDepositRequestsRouter);
 router.use("/markup/b2b", admB2bSpecialMarkupRouter);
 router.use("/api-master", admApiMasterRouter);

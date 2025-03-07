@@ -68,6 +68,7 @@ const b2cOrderSchema = Joi.object({
         isPromoAdded: Joi.boolean().allow("", null),
     }),
     paymentMethod: Joi.string().required().allow("ccavenue", "wallet", "ccavenue-wallet"),
+    specialRequest: Joi.string().allow("", null),
 });
 
 module.exports = { b2cOrderSchema };

@@ -1,27 +1,14 @@
 const { isValidObjectId } = require("mongoose");
-
+const { B2CWalletDeposit, B2cWalletWithdraw } = require("../../../b2b/models");
 const { sendErrorResponse } = require("../../../helpers");
-const {
-    Reseller,
-    B2BTransaction,
-    B2BWallet,
-    B2BWalletDeposit,
-    B2bWalletWithdraw,
-} = require("../../../b2b/models");
-const { B2BWalletWithdrawRequest } = require("../../../b2b/models");
-const { deductAmountFromWallet } = require("../../../b2b/utils/wallet");
+const { User, B2CWallet, B2CTransaction } = require("../../../models");
+const { CompanyBankInfo } = require("../../../models/global");
 const {
     admB2bWalletDepositSchema,
 } = require("../../validations/global/admB2bWalletDeposit.schema");
-const { CompanyBankInfo } = require("../../../models/global");
-const {
-    rjectB2bWalletWithdrawRequestSchema,
-    approveB2bWalletWithdrawRequestSchema,
-} = require("../../validations/global/b2bWalletWithdrawRequest.schema");
-const { Types } = require("mongoose");
 
 module.exports = {
-    depositMoneyToB2bWalletAccount: async (req, res) => {
+    depositMoneyToB2cWalletAccount: async (req, res) => {
         try {
             const { resellerId, amount, referenceNo, paymentProcessor, companyBankId } = req.body;
 
@@ -33,12 +20,13 @@ module.exports = {
             if (!isValidObjectId(resellerId)) {
                 return sendErrorResponse(res, 400, "invalid reseller id");
             }
-            const reseller = await Reseller.findOne({
+            const user = await User.findOne({
                 _id: resellerId,
-                $or: [{ status: "ok" }, { status: "disabled" }],
+                // $or: [{ status: "ok" }, { status: "disabled" }],
             });
-            if (!reseller) {
-                return sendErrorResponse(res, 400, "reseller not found or not active");
+
+            if (!user) {
+                return sendErrorResponse(res, 400, "user not found or not active");
             }
 
             if (Number(amount) <= 0) {
@@ -54,10 +42,9 @@ module.exports = {
                     return sendErrorResponse(res, 404, "company bank not found");
                 }
             }
-            console.log("call reached 1", req.admin);
 
-            const walletDeposit = new B2BWalletDeposit({
-                reseller: resellerId,
+            const walletDeposit = new B2CWalletDeposit({
+                user: resellerId,
                 depositAmount: amount,
                 creditAmount: amount,
                 fee: 0,
@@ -68,48 +55,24 @@ module.exports = {
                 referenceNo: paymentProcessor === "bank" ? referenceNo : null,
                 companyBankId: paymentProcessor === "bank" ? companyBankId : null,
             });
+
             await walletDeposit.save();
-            console.log("call reached 2");
 
-            let b2bWallet = await B2BWallet.findOne({ reseller: resellerId });
-            if (!b2bWallet) {
-                b2bWallet = new B2BWallet({
+            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
+            if (!b2cWallet) {
+                b2cWallet = new B2CWallet({
                     balance: 0,
-                    creditAmount: 0,
-                    creditUsed: 0,
-                    reseller: resellerId,
+                    user: resellerId,
                 });
-                console.log("call reached 3");
-
-                b2bWallet.balance += Number(amount);
-                await b2bWallet.save();
-                console.log("call reached 4");
-            } else {
-                if (b2bWallet.creditUsed && b2bWallet.creditUsed > 0) {
-                    let balance = Number(b2bWallet.creditUsed) - Number(amount);
-
-                    if (balance <= 0) {
-                        b2bWallet.creditUsed = 0;
-                        b2bWallet.balance += Number(-balance);
-                        await b2bWallet.save();
-                    } else {
-                        b2bWallet.creditUsed = Number(balance);
-                        await b2bWallet.save();
-                    }
-                } else {
-                    b2bWallet.balance += Number(amount);
-                    await b2bWallet.save();
-                }
             }
-            console.log("call reached 5");
+            b2cWallet.balance += Number(amount);
+            await b2cWallet.save();
 
             walletDeposit.status = "completed";
             await walletDeposit.save();
 
-            console.log("call reached 6");
-
-            await B2BTransaction.create({
-                reseller: resellerId,
+            await B2CTransaction.create({
+                user: resellerId,
                 paymentProcessor: "wallet",
                 product: "wallet",
                 processId: walletDeposit?._id,
@@ -117,8 +80,8 @@ module.exports = {
                 debitAmount: 0,
                 creditAmount: amount,
                 directAmount: 0,
-                closingBalance: b2bWallet.balance,
-                dueAmount: b2bWallet.creditUsed,
+                closingBalance: b2cWallet.balance,
+                dueAmount: b2cWallet.creditUsed,
                 remark: "Wallet deposit",
                 dateTime: new Date(),
             });
@@ -126,9 +89,7 @@ module.exports = {
 
             res.status(200).json({
                 message: "balance successfully added",
-                balance: b2bWallet.balance,
-                creditAmount: b2bWallet.creditAmount,
-                creditUsed: b2bWallet.creditUsed,
+                balance: b2cWallet.balance,
             });
         } catch (err) {
             console.log(err);
@@ -136,34 +97,35 @@ module.exports = {
         }
     },
 
-    removeMoneyFromB2bWallet: async (req, res) => {
+    removeMoneyFromB2cWallet: async (req, res) => {
         try {
             const { resellerId, amount, note } = req.body;
 
             if (!isValidObjectId(resellerId)) {
                 return sendErrorResponse(res, 400, "invalid reseller id");
             }
-            const reseller = await Reseller.findOne({
+            const user = await User.findOne({
                 _id: resellerId,
-                $or: [{ status: "ok" }, { status: "disabled" }],
+                // $or: [{ status: "ok" }, { status: "disabled" }],
             });
-            if (!reseller) {
-                return sendErrorResponse(res, 404, "reseller not found or not active");
+            if (!user) {
+                return sendErrorResponse(res, 404, "user not found or not active");
             }
 
             if (Number(amount) <= 0) {
                 return sendErrorResponse(res, 400, "amount should be greater than zero");
             }
 
-            let b2bWallet = await B2BWallet.findOne({ reseller: resellerId });
-            if (!b2bWallet) {
+            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
+            if (!b2cWallet) {
                 return sendErrorResponse(
                     res,
                     400,
                     "sorry, there is no wallet associated with this b2b account"
                 );
             }
-            if (b2bWallet.balance < Number(amount)) {
+
+            if (b2cWallet.balance < Number(amount)) {
                 return sendErrorResponse(
                     res,
                     400,
@@ -171,8 +133,8 @@ module.exports = {
                 );
             }
 
-            const b2bWalletWithdraw = new B2bWalletWithdraw({
-                resellerId: resellerId,
+            const b2cWalletWithdraw = new B2cWalletWithdraw({
+                user: resellerId,
                 withdrawAmount: Number(amount),
                 fee: 0,
                 status: "pending",
@@ -180,16 +142,16 @@ module.exports = {
                 paymentProcessor: "direct",
                 note: "",
             });
-            await b2bWalletWithdraw.save();
+            await b2cWalletWithdraw.save();
 
-            b2bWallet.balance -= Number(amount);
-            await b2bWallet.save();
+            b2cWallet.balance -= Number(amount);
+            await b2cWallet.save();
 
-            b2bWalletWithdraw.status = "completed";
-            await b2bWalletWithdraw.save();
+            b2cWalletWithdraw.status = "completed";
+            await b2cWalletWithdraw.save();
 
-            await B2BTransaction.create({
-                reseller: resellerId,
+            await B2CTransaction.create({
+                user: resellerId,
                 paymentProcessor: "wallet",
                 product: "wallet",
                 processId: "0",
@@ -197,15 +159,15 @@ module.exports = {
                 debitAmount: amount,
                 creditAmount: 0,
                 directAmount: 0,
-                closingBalance: b2bWallet.balance,
-                dueAmount: b2bWallet.creditUsed,
+                closingBalance: b2cWallet.balance,
+                dueAmount: b2cWallet.creditUsed,
                 remark: "Wallet deduction",
                 dateTime: new Date(),
             });
 
             res.status(200).json({
                 message: "balance successfully removed",
-                balance: b2bWallet.balance,
+                balance: b2cWallet.balance,
             });
         } catch (err) {
             sendErrorResponse(res, 500, err);

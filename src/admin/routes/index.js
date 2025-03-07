@@ -17,6 +17,8 @@ const admPaymentServicesRouter = require("./settings/admPaymentServicesRouter");
 const admEmailSettingsRouter = require("./settings/admEmailSettingsRouter");
 const admOtpSettingsRouter = require("./settings/admOtpSettingsRouter");
 const admB2bWalletsRouter = require("./global/admB2bWalletsRouter");
+const admB2cWalletsRouter = require("./global/admB2cWalletsRouter");
+
 const admB2bSpecialMarkupRouter = require("./global/admB2bSpecialMarkupRouter");
 const admApiMasterRouter = require("./settings/admApiMasterRouter");
 const admRefundRouter = require("./global/admRefundRouter");
@@ -106,6 +108,7 @@ module.exports = {
     admEmailSettingsRouter,
     admOtpSettingsRouter,
     admB2bWalletsRouter,
+    admB2cWalletsRouter,
     admB2bSpecialMarkupRouter,
     admApiMasterRouter,
     admRefundRouter,

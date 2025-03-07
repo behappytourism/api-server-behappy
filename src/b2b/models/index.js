@@ -29,6 +29,8 @@ const B2BVisaApplication = require("./visa/b2bVisaApplication.model");
 const B2BWalletDeposit = require("./global/b2bWalletDeposit.model");
 const B2bWalletDepositRequest = require("./global/b2bWalletDepositRequest.model");
 const B2bWalletWithdraw = require("./global/b2bWalletWithdraw.model");
+const B2cWalletWithdraw = require("./global/b2cWalletWithdraw.model");
+const B2CWalletDeposit = require("./global/b2cWalletDeposit.model");
 const B2BAttractionOrderCancellation = require("./attraction/b2bAttractionCancellation.model");
 const B2BTransferOrder = require("./transfer/b2bTransferOrder.model");
 const B2BTransferOrderPayment = require("./transfer/b2bTransferPayment.model");
@@ -79,6 +81,8 @@ module.exports = {
     B2BWalletDeposit,
     B2bWalletDepositRequest,
     B2bWalletWithdraw,
+    B2cWalletWithdraw,
+    B2CWalletDeposit,
     B2BAttractionOrderCancellation,
     B2BTransferOrder,
     B2BTransferOrderPayment,

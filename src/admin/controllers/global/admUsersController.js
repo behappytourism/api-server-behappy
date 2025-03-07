@@ -1,5 +1,10 @@
 const { sendErrorResponse } = require("../../../helpers");
-const { User, AffiliateClickHistory, AffiliatePointHistory } = require("../../../models");
+const {
+    User,
+    AffiliateClickHistory,
+    AffiliatePointHistory,
+    B2CWallet,
+} = require("../../../models");
 const { isValidObjectId, Types } = require("mongoose");
 const xl = require("excel4node");
 
@@ -120,11 +125,14 @@ module.exports = {
                 },
             ]);
 
+            const walletBalance = await B2CWallet.findOne({ user: Types.ObjectId(userId) });
+
             res.status(200).json({
                 user: user[0],
                 totalClicks: totalClicks[0]?.totalClicks || 0,
                 totalPoints: totalPoints[0]?.totalPoints || 0,
                 totalTransation: totalPoints[0]?.totalTransation || 0,
+                balance: walletBalance.balance || 0,
             });
         } catch (err) {
             sendErrorResponse(res, 500, err);

@@ -82,6 +82,10 @@ const b2cOrderSchema = new Schema(
             required: true,
             default: false,
         },
+        specialRequest: {
+            type: String,
+            required: true,
+        },
     },
     { timestamps: true }
 );
