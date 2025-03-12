@@ -26,6 +26,7 @@ const Currency = require("./global/currency.modal");
 const Driver = require("./global/driver.model");
 const B2CTransaction = require("./global/b2cTransaction.model");
 const B2CWallet = require("./global/b2cWallet.model");
+const B2CWalletWithdrawRequest = require("./global/b2cWithdrawRequest.model");
 const PaymentService = require("./settings/paymentService.model");
 const OtpSettings = require("./settings/otpSettings.model");
 const EmailSettings = require("./settings/emailSettings.model");
@@ -169,6 +170,7 @@ module.exports = {
     B2CAttractionMarkup,
     B2CTransaction,
     B2CWallet,
+    B2CWalletWithdrawRequest,
     PaymentService,
     OtpSettings,
     EmailSettings,

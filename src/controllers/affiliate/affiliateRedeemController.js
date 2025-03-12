@@ -9,6 +9,7 @@ const {
     AffiliateUser,
     AffiliateRedeem,
     FinancialUserData,
+    B2CWallet,
 } = require("../../models");
 const AffiliateSetting = require("../../models/affiliate/affiliateSettings.model");
 const { affiliateRedeemSchema } = require("../../validations/affiliate/affiliateRedeem.schema");
@@ -16,20 +17,20 @@ const { affiliateRedeemSchema } = require("../../validations/affiliate/affiliate
 module.exports = {
     initateAffiliateRedeemRequest: async (req, res) => {
         try {
-            const { selectedId, points, currency } = req.body;
+            const { points } = req.body;
 
-            const { _, error } = affiliateRedeemSchema.validate(req.body);
-            if (error) {
-                return sendErrorResponse(res, 400, error.details[0].message);
-            }
-            let financialUserData = await FinancialUserData.findOne({ _id: selectedId });
-            if (!financialUserData) {
-                return sendErrorResponse(res, 400, "financial data not found");
-            }
+            // const { _, error } = affiliateRedeemSchema.validate(req.body);
+            // if (error) {
+            //     return sendErrorResponse(res, 400, error.details[0].message);
+            // }
+            // let financialUserData = await FinancialUserData.findOne({ _id: selectedId });
+            // if (!financialUserData) {
+            //     return sendErrorResponse(res, 400, "financial data not found");
+            // }
 
-            if (financialUserData.type === "crypto" && currency !== "USD") {
-                return sendErrorResponse(res, 400, "USD option only available for type crypto");
-            }
+            // if (financialUserData.type === "crypto" && currency !== "USD") {
+            //     return sendErrorResponse(res, 400, "USD option only available for type crypto");
+            // }
 
             const affiliateSettings = await AffiliateSetting.findOne({});
 
@@ -56,7 +57,17 @@ module.exports = {
                 );
             }
 
-            const totalAmount = await convertCurrencyUSD(amount, currency);
+            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
+            if (!b2cWallet) {
+                b2cWallet = new B2CWallet({
+                    balance: 0,
+                    user: req.user._id,
+                });
+            }
+            await b2cWallet.save();
+
+            // const totalAmount = await convertCurrencyUSD(amount, currency); 
+            const totalAmount = Number(amount) 
 
             const feeDeduction = Number(affiliateSettings.deductionFee / 100) * totalAmount;
 
@@ -65,19 +76,21 @@ module.exports = {
             const newRedeemRequest = new AffiliateRedeem({
                 user: req.user._id,
                 points,
-                financialData: financialUserData._id,
+                // financialData: financialUserData._id,
                 amount: finalAmount,
                 status: "initiated",
                 feeDeduction: feeDeduction,
-                currency,
+                // currency,
             });
+
 
             await newRedeemRequest.save();
 
             res.status(200).json({
                 redeemRequest: newRedeemRequest._id,
-                amount: finalAmount,
-                currency: currency,
+                amount: finalAmount,  
+                feeDeduction: feeDeduction,
+                // currency: currency,
             });
         } catch (err) {
             console.log(err);
@@ -98,13 +111,18 @@ module.exports = {
                 return sendErrorResponse(res, 400, "Affiliate request already  progressed");
             }
 
-            affiliateRedeemRequest.status = "pending";
+            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
 
+            b2cWallet.balance += Number(affiliateRedeemRequest.amount);
+
+            affiliateRedeemRequest.status = "approved";
+        
+            await b2cWallet.save();
             await affiliateRedeemRequest.save();
 
             res.status(200).json({
                 redeemRequest: affiliateRedeemRequest._id,
-                message: "currently request has been send  wait for the confirmation from admin ",
+                message: "Amount had been added to ypur wallet ",
             });
         } catch (err) {
             sendErrorResponse(res, 500, err);

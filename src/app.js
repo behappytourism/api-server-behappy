@@ -36,7 +36,7 @@ const {
     attrStandAloneRouter,
     b2cFrontendRouter,
     b2cTransferOrderRouter,
-    emailUnsubscribeRouter,
+    emailUnsubscribeRouter,b2cWalletWithdrawalRequest
 } = require("./routes");
 const { default: axios } = require("axios");
 const { AttractionTicket } = require("./models");
@@ -100,6 +100,8 @@ app.use("/api/v1/tour-packages/enquiries", b2cTourPackageEnquiryRouter);
 app.use("/api/v1/tour-packages", b2cTourPackagesRouter);
 app.use("/api/v1/b2c", b2cFrontendRouter);
 app.use("/api/v1/email/subscription", emailUnsubscribeRouter);
+app.use("/api/v1/wallet/withdraw-requests", b2cWalletWithdrawalRequest);
+
 
 // ADMIN ROUTE
 app.use("/api/v1/admin", adminRouter);

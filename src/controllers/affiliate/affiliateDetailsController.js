@@ -103,6 +103,14 @@ module.exports = {
                 },
                 {
                     $lookup: {
+                        from: "destinations",
+                        localField: "destination",
+                        foreignField: "_id",
+                        as: "destination",
+                    },
+                },
+                {
+                    $lookup: {
                         from: "affiliateclickhistories",
                         localField: "_id",
                         foreignField: "attraction",
@@ -129,6 +137,11 @@ module.exports = {
                     },
                 },
                 {
+                    $set: {
+                        destination: { $arrayElemAt: ["$destination", 0] },
+                    },
+                },
+                {
                     $addFields: {
                         clickCount: { $size: "$click" },
                     },
@@ -138,6 +151,7 @@ module.exports = {
                         title: 1,
                         slug: 1,
                         clickCount: 1,
+                        destination: 1,
                     },
                 },
                 {

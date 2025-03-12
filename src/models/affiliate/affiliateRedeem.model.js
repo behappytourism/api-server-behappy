@@ -9,19 +9,19 @@ const affiliateRedeemSchema = new Schema(
             ref: "User",
             required: true,
         },
-        currency: {
-            type: String,
-            required: true,
-        },
+        // currency: {
+        //     type: String,
+        //     required: true,
+        // },
         points: {
             type: Number,
             required: true,
         },
-        financialData: {
-            type: Schema.Types.ObjectId,
-            ref: "FinancialUserData",
-            required: true,
-        },
+        // financialData: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "FinancialUserData",
+        //     required: true,
+        // },
         feeDeduction: {
             type: Number,
             required: true,

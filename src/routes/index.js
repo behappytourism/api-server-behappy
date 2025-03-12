@@ -23,7 +23,7 @@ const attrStandAloneRouter = require("./attraction/attrStandAloneRouter");
 const b2cFrontendRouter = require("./global/b2cFrontendRouter");
 const b2cTransferOrderRouter = require("./transfer/transferOrderRouter");
 const emailUnsubscribeRouter = require("./email/emailUnsubscribeRouter");
-
+const b2cWalletWithdrawalRequest = require("./global/b2cWalletWithdrawlRequestsRouter");
 module.exports = {
     homeRouter,
     usersRouter,
@@ -50,4 +50,5 @@ module.exports = {
     b2cFrontendRouter,
     b2cTransferOrderRouter,
     emailUnsubscribeRouter,
+    b2cWalletWithdrawalRequest,
 };
