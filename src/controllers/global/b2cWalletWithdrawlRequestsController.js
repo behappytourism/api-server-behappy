@@ -1,9 +1,15 @@
 const { isValidObjectId } = require("mongoose");
 const { sendErrorResponse } = require("../../helpers");
-const { B2CWallet, Country, B2CBankDetails, B2CWalletWithdrawRequest, B2CTransaction } = require("../../models");
-const { b2cWalletWithdrawalRequestSchema } = require("../../validations/global/b2cWalletWithdrawalRequest.schema");
-
-
+const {
+    B2CWallet,
+    Country,
+    B2CBankDetails,
+    B2CWalletWithdrawRequest,
+    B2CTransaction,
+} = require("../../models");
+const {
+    b2cWalletWithdrawalRequestSchema,
+} = require("../../validations/global/b2cWalletWithdrawalRequest.schema");
 
 module.exports = {
     walletWithdrawalRequestInitiate: async (req, res) => {
@@ -52,7 +58,7 @@ module.exports = {
                 }
 
                 bankDetails = new B2CBankDetails({
-                    isoCode,
+                    countryId: country._id,
                     bankName,
                     branchName,
                     accountHolderName,
