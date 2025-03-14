@@ -43,19 +43,19 @@ module.exports = {
                 return sendErrorResponse(res, 400, "Affiliate user not found");
             }
 
+            if (points < 50) {
+                return sendErrorResponse(
+                    res,
+                    400,
+                    "Minimum 50 points required for reedem to wallet"
+                );
+            }
+
             if (points > affiliateUser.totalPoints) {
                 return sendErrorResponse(res, 400, "Affiliate have not enough points");
             }
 
             let amount = (1 / affiliateSettings.pointValue) * points;
-
-            if (amount < 50) {
-                return sendErrorResponse(
-                    res,
-                    400,
-                    "Affiliate amount value should be geater than 50 AED"
-                );
-            }
 
             let b2cWallet = await B2CWallet.findOne({ user: req.user._id });
             if (!b2cWallet) {
@@ -101,6 +101,15 @@ module.exports = {
         try {
             const { redeemId } = req.params;
 
+            const affiliateUser = await AffiliateUser.findOne({
+                user: req.user._id,
+                isActive: true,
+            });
+
+            if (!affiliateUser) {
+                return sendErrorResponse(res, 400, "Affiliate user not found");
+            }
+
             const affiliateRedeemRequest = await AffiliateRedeem.findById(redeemId);
             if (!affiliateRedeemRequest) {
                 return sendErrorResponse(res, 400, "Affiliate not found");
@@ -113,9 +122,11 @@ module.exports = {
             let b2cWallet = await B2CWallet.findOne({ user: req.user._id });
 
             b2cWallet.balance += Number(affiliateRedeemRequest.amount);
+            affiliateUser.totalPoints -= Number(points);
 
             affiliateRedeemRequest.status = "approved";
 
+            await affiliateUser.save();
             await b2cWallet.save();
             await affiliateRedeemRequest.save();
 
