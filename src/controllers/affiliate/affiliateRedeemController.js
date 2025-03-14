@@ -122,7 +122,7 @@ module.exports = {
 
             res.status(200).json({
                 redeemRequest: affiliateRedeemRequest._id,
-                message: "Amount had been added to ypur wallet ",
+                message: "Amount had been added to your wallet ",
             });
         } catch (err) {
             sendErrorResponse(res, 500, err);

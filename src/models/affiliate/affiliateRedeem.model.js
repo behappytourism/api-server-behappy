@@ -43,12 +43,12 @@ const affiliateRedeemSchema = new Schema(
         transactionNo: {
             type: Number,
         },
-        reason: {
-            type: String,
-            required: function () {
-                return this.status === "approved" || this.status === "cancelled";
-            },
-        },
+        // reason: {
+        //     type: String,
+        //     required: function () {
+        //         return this.status === "approved" || this.status === "cancelled";
+        //     },
+        // },
     },
     { timestamps: true }
 );

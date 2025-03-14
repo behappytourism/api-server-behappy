@@ -24,6 +24,8 @@ const b2cFrontendRouter = require("./global/b2cFrontendRouter");
 const b2cTransferOrderRouter = require("./transfer/transferOrderRouter");
 const emailUnsubscribeRouter = require("./email/emailUnsubscribeRouter");
 const b2cWalletWithdrawalRequest = require("./global/b2cWalletWithdrawlRequestsRouter");
+const b2cTransactionRouter = require("./global/b2cTransactionsRouter");
+
 module.exports = {
     homeRouter,
     usersRouter,
@@ -51,4 +53,5 @@ module.exports = {
     b2cTransferOrderRouter,
     emailUnsubscribeRouter,
     b2cWalletWithdrawalRequest,
+    b2cTransactionRouter,
 };
