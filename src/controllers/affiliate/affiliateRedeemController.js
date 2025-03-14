@@ -122,7 +122,7 @@ module.exports = {
             let b2cWallet = await B2CWallet.findOne({ user: req.user._id });
 
             b2cWallet.balance += Number(affiliateRedeemRequest.amount);
-            affiliateUser.totalPoints -= Number(points);
+            affiliateUser.totalPoints -= Number(affiliateRedeemRequest?.points);
 
             affiliateRedeemRequest.status = "approved";
 
