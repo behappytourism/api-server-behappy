@@ -57,7 +57,7 @@ module.exports = {
                 );
             }
 
-            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
+            let b2cWallet = await B2CWallet.findOne({ user: req.user._id });
             if (!b2cWallet) {
                 b2cWallet = new B2CWallet({
                     balance: 0,
@@ -66,8 +66,8 @@ module.exports = {
             }
             await b2cWallet.save();
 
-            // const totalAmount = await convertCurrencyUSD(amount, currency); 
-            const totalAmount = Number(amount) 
+            // const totalAmount = await convertCurrencyUSD(amount, currency);
+            const totalAmount = Number(amount);
 
             const feeDeduction = Number(affiliateSettings.deductionFee / 100) * totalAmount;
 
@@ -83,12 +83,11 @@ module.exports = {
                 // currency,
             });
 
-
             await newRedeemRequest.save();
 
             res.status(200).json({
                 redeemRequest: newRedeemRequest._id,
-                amount: finalAmount,  
+                amount: finalAmount,
                 feeDeduction: feeDeduction,
                 // currency: currency,
             });
@@ -106,17 +105,17 @@ module.exports = {
             if (!affiliateRedeemRequest) {
                 return sendErrorResponse(res, 400, "Affiliate not found");
             }
-            
+
             if (affiliateRedeemRequest?.status !== "initiated") {
                 return sendErrorResponse(res, 400, "Affiliate request already  progressed");
             }
 
-            let b2cWallet = await B2CWallet.findOne({ user: resellerId });
+            let b2cWallet = await B2CWallet.findOne({ user: req.user._id });
 
             b2cWallet.balance += Number(affiliateRedeemRequest.amount);
 
             affiliateRedeemRequest.status = "approved";
-        
+
             await b2cWallet.save();
             await affiliateRedeemRequest.save();
 
