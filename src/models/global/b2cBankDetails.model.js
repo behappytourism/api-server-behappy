@@ -23,6 +23,10 @@ const b2cBankDetailsSchema = new Schema(
             type: String,
             required: true,
         },
+        branchName: {
+            type: String,
+            required: true,
+        },
         ifscCode: {
             type: String,
         },
@@ -33,7 +37,8 @@ const b2cBankDetailsSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
-        },    },
+        },
+    },
     { timestamps: true }
 );
 

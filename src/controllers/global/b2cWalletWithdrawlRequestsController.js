@@ -90,7 +90,7 @@ module.exports = {
                 status: "initiated",
                 otp,
                 b2bBankDetails: {
-                    isoCode: bankDetails.isoCode,
+                    isoCode: isoCode,
                     bankName: bankDetails.bankName,
                     accountHolderName: bankDetails.accountHolderName,
                     accountNumber: bankDetails?.accountNumber,
