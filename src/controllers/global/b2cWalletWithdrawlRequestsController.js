@@ -59,7 +59,7 @@ module.exports = {
 
                 bankDetails = new B2CBankDetails({
                     countryId: country._id,
-                    bankCountry: isocode,
+                    bankCountry: isoCode,
                     bankName,
                     branchName,
                     accountHolderName,
