@@ -174,9 +174,11 @@ module.exports = {
             const affiliateSettings = await AffiliateSetting.findOne({}).select(
                 "deductionFee pointValue"
             );
+            
             if (!affiliateSettings) {
                 return sendErrorResponse(res, 400, "Affiliate settings not find ");
             }
+
             res.status(200).json(affiliateSettings);
         } catch (err) {
             sendErrorResponse(res, 500, err);
