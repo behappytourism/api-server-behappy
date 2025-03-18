@@ -1174,7 +1174,7 @@ module.exports = {
                             isPrivateTransferAvailable: 1,
                             // privateTransfer: 1,
                             // markup: 1,
-                            promoAmount: 1,
+                            promoAmountAdult: 1,
                         },
                         duration: 1,
                         durationType: 1,
